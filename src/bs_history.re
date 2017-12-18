@@ -11,7 +11,7 @@ module History = {
   type action = [ | `PUSH | `REPLACE | `POP];
   [@bs.get] external length : t => int = "";
   [@bs.get] external action : t => action = "";
-  [@bs.get] external location : t => string = "";
+  [@bs.get] external location : t => Location.t = "location";
   [@bs.send] external listen : (t, ~location: Location.t, ~action: action, unit) => unit = "";
   /* TODO: state typing */
   module State = {
