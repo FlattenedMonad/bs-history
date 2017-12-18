@@ -26,14 +26,22 @@ module History = {
 
 type getUserConfirmation = (~path: string, ~confirmation: bool) => unit;
 
-type browserHistoryOpt = {
+[@bs.deriving jsConverter] type browserHistoryOpt = {
   basename: string,
   forceRefresh: bool,
   keyLength: int,
   getUserConfirmation
 };
 
-[@bs.module] external createBrowserHistory : browserHistoryOpt => History.t = "";
+type jsBrowserHistoryOpt = Js.t({.
+  basename: string,
+  forceRefresh: bool,
+  keyLength: int,
+  getUserConfirmation
+});
+
+[@bs.module "history/createBrowserHistory"] external createBrowserHistory : jsBrowserHistoryOpt => History.t = "default";
+let createBrowserHistory : browserHistoryOpt => History.t = (opt) => createBrowserHistory(browserHistoryOptToJs(opt));
 
 type memoryHistoryOpt = {
   initialEntries: list(string),
@@ -41,12 +49,29 @@ type memoryHistoryOpt = {
   keyLength: int
 };
 
-[@bs.module] external createMemoryHistory : memoryHistoryOpt => History.t = "";
+type jsMemoryHistoryOpt = Js.t({.
+  initialEntries: array(string),
+  initialIndex: int,
+  keyLength: int
+});
 
-type hashHistoryOpt = {
+let memoryHistoryOptToJs = ({ initialEntries, initialIndex, keyLength }) =>
+  [%bs.obj { initialEntries: Array.of_list(initialEntries), initialIndex, keyLength}];
+
+[@bs.module "history/createMemoryHistory"] external createMemoryHistory : jsMemoryHistoryOpt => History.t = "default";
+let createMemoryHistory : memoryHistoryOpt => History.t = (opt) => createMemoryHistory(memoryHistoryOptToJs(opt));
+
+[@bs.deriving jsConverter] type hashHistoryOpt = {
   basename: string,
   hashType: string,
   getUserConfirmation
 };
 
-[@bs.module] external createHashHistory : hashHistoryOpt => History.t = "";
+type jsHashHistoryOpt = Js.t({.
+  basename: string,
+  hashType: string,
+  getUserConfirmation
+});
+
+[@bs.module "history/createHashHistory"] external createHashHistory : jsHashHistoryOpt => History.t = "default";
+let createHashHistory : hashHistoryOpt => History.t = (opt) => createHashHistory(hashHistoryOptToJs(opt));
